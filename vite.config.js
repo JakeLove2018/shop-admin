@@ -11,5 +11,14 @@ export default defineConfig({
   plugins: [
     vue(),
     windicss()
-  ]
+  ],
+  server:{
+    proxy:{
+      '/api':{
+        target:'http://ceshi13.dishait.cn',
+        changeOrigin:true,
+        rewrite:(path) => path.replace(/^\/api/,'')
+      }
+    }
+  }
 })
