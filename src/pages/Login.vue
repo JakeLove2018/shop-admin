@@ -1,9 +1,10 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
-import { login } from '~/api/manager.js';
+import { login,getInfo } from '~/api/manager.js';
 import { useRouter } from 'vue-router';  
-import {ElNotification} from 'element-plus';
+import { tosta } from '~/composables/utils.js';
+import {setToken,getToken,removeToken} from '~/composables/auth.js';
 const form = reactive({
   username: "admin",
   password: "admin",
@@ -25,31 +26,25 @@ const rules = {
     },
   ],
 };
-const loding = ref(false);
+const loading = ref(false);
 const formRef = ref(null);
 const onSubmit = () => {
-  loding.value = false
   formRef.value.validate((valid) => {
     if (!valid) {
       return false
     } else {
+      loading.value = true
       login(form.username, form.password).then((res) => {
-        ElNotification({
-          title: '成功',
-          message:'登录成功',
-          type: 'success',
-          duration:1000
+        tosta('成功','登录成功','success',1000)
+        setToken(res.token)
+        getInfo().then((res1)=>{
+          console.log(res1);
         })
+
         router.push('/')
-        loding.value = true
-      }).catch(err => {
-        ElNotification({
-          title: '警告',
-          message: err.response.data.msg || '请求失败',
-          type: 'warning',
-          duration:1000
-        })
-      })
+      }).finally(()=>{
+    loading.value = false;
+  })
     }
   })
 
@@ -57,7 +52,7 @@ const onSubmit = () => {
 </script>
 <template>
   <div>
-    <el-row class="login-container" v-loading="loding">
+    <el-row class="login-container">
       <el-col :span=16 class="left">
         <div>
           <div class="left-text-one">欢迎来到得联盟</div>
@@ -82,7 +77,7 @@ const onSubmit = () => {
             </icons>
           </el-form-item>
           <el-form-item>
-            <el-button class="w-[250px]" type="primary" @click="onSubmit" round color="#626aef">登录</el-button>
+            <el-button class="w-[250px]" type="primary" @click="onSubmit" round color="#626aef" :loading="loading">登录</el-button>
           </el-form-item>
         </el-form>
       </el-col>

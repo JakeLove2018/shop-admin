@@ -5,7 +5,6 @@
 </template>
 
 <script setup>
-  let conunt = 1
 </script>
 
 <style lang="scss" scoped>
