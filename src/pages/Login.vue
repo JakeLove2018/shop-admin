@@ -1,15 +1,15 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref ,onBeforeUnmount,onMounted} from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
-import { login,getInfo } from '~/api/manager.js';
-import { useRouter } from 'vue-router';  
+import { useRouter } from 'vue-router';
 import { tosta } from '~/composables/utils.js';
-import {setToken,getToken,removeToken} from '~/composables/auth.js';
+import { setToken, getToken, removeToken } from '~/composables/auth.js';
+import { useStore } from 'vuex'
 const form = reactive({
   username: "admin",
   password: "admin",
 })
-const router = useRouter(); 
+const router = useRouter();
 const rules = {
   account: [
     {
@@ -26,6 +26,7 @@ const rules = {
     },
   ],
 };
+const store = useStore();
 const loading = ref(false);
 const formRef = ref(null);
 const onSubmit = () => {
@@ -34,21 +35,28 @@ const onSubmit = () => {
       return false
     } else {
       loading.value = true
-      login(form.username, form.password).then((res) => {
-        tosta('成功','登录成功','success',1000)
-        setToken(res.token)
-        getInfo().then((res1)=>{
-          console.log(res1);
-        })
-
+      store.dispatch('login', form).then((res) => {
+        tosta('成功', '登陆成功')
         router.push('/')
-      }).finally(()=>{
-    loading.value = false;
-  })
+      }).finally(() => {
+        loading.value = false;
+      })
     }
   })
-
 }
+// 添加键盘监听
+function onKeyup(e){
+  if(e.key === 'enter'){
+    onSubmit()
+  }
+}
+onMounted(()=>{
+  document.addEventListener('keyup',onKeyup)
+})
+onBeforeUnmount(()=>{
+  document.removeEventListener('keyup',onKeyup)
+})
+
 </script>
 <template>
   <div>
@@ -77,7 +85,8 @@ const onSubmit = () => {
             </icons>
           </el-form-item>
           <el-form-item>
-            <el-button class="w-[250px]" type="primary" @click="onSubmit" round color="#626aef" :loading="loading">登录</el-button>
+            <el-button class="w-[250px]" type="primary" @click="onSubmit" round color="#626aef" :loading="loading">登录
+            </el-button>
           </el-form-item>
         </el-form>
       </el-col>
