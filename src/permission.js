@@ -1,7 +1,8 @@
-import router from '~/router';
+import {router,addRoutes} from '~/router';
 import { getToken } from '~/composables/auth.js';
 import { tosta,showFullLoading,hidedFullLoading } from '~/composables/utils.js';
 import store from './store';
+import {ref} from 'vue'; 
 
 router.beforeEach(async (to, from, next) => {
   showFullLoading()
@@ -17,13 +18,16 @@ router.beforeEach(async (to, from, next) => {
     return next({ path: from.path ? from.path : '/' })
   }
   // 获取用户登陆就自动获取用户信息,并存储在vuex中,
+  let hasNewRouters = ref(false);
   if (token) {
-    await store.dispatch('getinfo')
+    let {menus} = await store.dispatch('getinfo')
+    // 动态添加路由
+    hasNewRouters =  addRoutes(menus)
   }
-  console.log(to.meta.title)
   let title = (to.meta.title ? to.meta.title : '') + '-商城';
   document.title = title;
-  next();
+  hasNewRouters ? next(to.fullpath): next();
+
 });
 // 全局后置守卫
 router.afterEach((to, from) => {

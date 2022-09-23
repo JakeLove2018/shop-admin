@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { tosta } from '~/composables/utils.js';
 import {setToken,getToken,removeToken} from '~/composables/auth.js';
+import store from './store/index.js';
+
 const service = axios.create({
   baseURL:"/api"
 })
@@ -23,7 +25,11 @@ service.interceptors.response.use((res)=>{
   return res.data.data;
 }, (error)=>{
   // 对响应错误做点什么
+  const msg = error.msg || '请求失败'
   tosta('警告', error.msg || '请求失败' , 'waring',1500)
+  if(msg === '请求失败'){
+    store.dispatch('logout').finally(()=>location.reload());
+  }
   return Promise.reject(error);
 });
 export default service;

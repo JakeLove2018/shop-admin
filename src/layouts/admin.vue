@@ -10,7 +10,7 @@ import FTaglistVue from './components/FTaglist.vue';
 			<FHeaderVue />
 		</el-header>
 		<el-container>
-			<el-aside>
+			<el-aside :style="$store.state.asideWidte">
 				<FMenuVue />
 			</el-aside>
 			<el-main>
@@ -20,3 +20,8 @@ import FTaglistVue from './components/FTaglist.vue';
 		</el-container>
 	</el-container>
 </template>
+<style>
+	.el-aside{
+		transition: all .5s;
+	}
+</style>

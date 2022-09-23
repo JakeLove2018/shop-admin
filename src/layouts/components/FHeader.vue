@@ -1,102 +1,41 @@
 <script setup>
-import { ref,reactive, } from 'vue';
-import { Fold, Refresh, FullScreen, Star, Aim } from '@element-plus/icons-vue';
-import { showModal, tosta } from '~/composables/utils.js';
-import { logout } from '~/api/manager.js';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { Fold, Refresh, FullScreen, Star, Aim,Expand } from '@element-plus/icons-vue';
 import { useFullscreen } from '@vueuse/core';
-import { notUndefined } from '@antfu/utils';
-const router = useRouter();
-const store = useStore();
-const showDrawer = ref(false)
+import FormDrawer from '~/components/FormDrawer.vue';
+import {useRepassword,useLogout} from '~/composables/useManager.js';
 const { isFullscreen/*<是否全屏>*/, toggle } = useFullscreen();
-function headerLogout() {
-  showModal('是否退出登录').then((res) => {
-    logout().finally(() => {
-      // 移除cookie里面的token,
-      store.dispatch('logout')
-      // 清除当前用户状态。
-      // 跳转回登录页
-      tosta("成功", "退出登录成功")
-      router.push('/login');
-    })
-  }).catch((err) => {
-
-  });
-}
+const {
+  formRef,
+  form,
+  rules,
+  onSubmit,
+  formDrawerRef,
+  openRePasswordForm,
+} = useRepassword()
+const { headerLogout } = useLogout()
+const handleRefresh = () => location.reload()
 function handleCommand(e) {
-  console.log(e)
   switch (e) {
     case "logout":
       headerLogout()
       break;
-
     case "rePassword":
-      showDrawer.value = true;
+      openRePasswordForm()
       break;
   }
 }
-const handleRefresh = () => location.reload()
-const form = reactive({
-  oldpassword:"",
-  password: "",
-  repassword:"",
-
-})
-const rules = {
-  oldpassword: [
-    {
-      required: true,
-      message: "请输入旧密码",
-      trigger: "blur",
-    },
-  ],
-  password: [
-    {
-      required: true,
-      message: "请输入密码",
-      trigger: "blur"
-    },
-  ],
-  repassword:[
-    {
-      required:true,
-      message:"确认输入密码",
-      trigger:"blur",
-    }
-  ],
-
-};
-const loading = ref(false);
-const formRef = ref(null);
-const onSubmit = () => {
-  formRef.value.validate((valid) => {
-    if (!valid) {
-      return false
-    } else {
-      loading.value = true
-      store.dispatch('login', form).then((res) => {
-        tosta('成功', '登陆成功')
-        router.push('/')
-      }).finally(() => {
-        loading.value = false;
-      })
-    }
-  })
-}
 </script>
-
 <template>
   <div class="f-header">
     <span class="logo">
       <el-icon class="mr-1">
         <Star />
       </el-icon>
-      商城系统
+      锦鲤商城系统
     </span>
-    <el-icon class="icon-btn">
-      <Fold />
+    <el-icon class="icon-btn" @click="$store.commit('handleAsideWidthe')">
+      <Fold v-if="$store.state.asideWidte == '250px' "/>
+      <Expand v-else />
     </el-icon>
     <el-tooltip effect="dark" content="刷新" placement="bottom">
       <el-icon class="icon-btn" @click="handleRefresh">
@@ -128,7 +67,10 @@ const onSubmit = () => {
         </template>
       </el-dropdown>
     </div>
-    <el-drawer v-model="showDrawer" title="修改密码" size="500px" :close-on-click-modal="false">
+    <el-drawer v-model="showDrawer" :close-on-click-modal="false">
+
+    </el-drawer>
+    <form-drawer ref="formDrawerRef" title="修改密码" size="45%" @submit="onSubmit" destroyOnClose>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item prop="oldpassword" label="旧密码">
           <el-input v-model="form.oldpassword" placeholder="请输入旧密码" />
@@ -139,14 +81,8 @@ const onSubmit = () => {
         <el-form-item prop="repassword" label="确认新密码">
           <el-input v-model="form.repassword" placeholder="请输入确认密码" show-password />
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit" :loading="loading">提交
-          </el-button>
-          <el-button type="primary" @click="onSubmit" :loading="loading">取消
-          </el-button>
-        </el-form-item>
       </el-form>
-    </el-drawer>
+    </form-drawer>
   </div>
 </template>
 <style>
