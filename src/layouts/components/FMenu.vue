@@ -2,6 +2,7 @@
 import { ref,computed } from 'vue'
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { Help,ShoppingBag } from '@element-plus/icons-vue'
 const router = useRouter();
 const asideMenu = computed(()=>store.state.menus)
 const handleSelect = (e)=>{

@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import {ref} from 'Vue'
+import {ref} from 'vue'
 const routes = [
   {
     path: '/',

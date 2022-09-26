@@ -9,4 +9,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import store from './store/index.js';
 import 'nprogress/nprogress.css';
 import './permission.js';
-createApp(App).use(element).use(ElementPlusIconsVue).use(router).use(store).mount('#app');
+const app = createApp(App);
+app.use(element).use(ElementPlusIconsVue).use(router).use(store).mount('#app');
+app.config.errorHandler = ()=> unll;
+app.config.warnHandler = ()=>false;
